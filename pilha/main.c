@@ -148,6 +148,7 @@ int main() {
     }
 
     // Libera a pilha
+    printf("Destruindo pilha\n");
     unstack(&myStack);
 
     return 0;
