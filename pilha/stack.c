@@ -1,101 +1,111 @@
 #include "stack_pub.h"
 #include "stack_pri.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 // Função para inicializar a pilha
 int stack(ppStack pp, int size, int sizedata) {
-    // Aloca memória para a estrutura da pilha
     *pp = (pStack)malloc(sizeof(struct PE));
     if (*pp == NULL) {
-        return FAIL; // Retorna erro se a alocação falhar
-    }
-
-    // Inicializa os campos da pilha
-    (*pp)->data = malloc(size * sizedata); // Aloca memória para os dados
-    if ((*pp)->data == NULL) {
-        free(*pp); // Libera a memória da estrutura se a alocação dos dados falhar
         return FAIL;
     }
 
-    (*pp)->size = size;        // Define o tamanho máximo da pilha
-    (*pp)->sizedata = sizedata; // Define o tamanho de cada elemento
-    (*pp)->top = -1;           // Inicializa o topo como -1 (pilha vazia)
+    (*pp)->data = malloc(size * sizedata);
+    if ((*pp)->data == NULL) {
+        free(*pp);
+        return FAIL;
+    }
 
-    return SUCCESS; // Retorna sucesso
+    (*pp)->size = size;
+    (*pp)->sizedata = sizedata;
+    (*pp)->top = -1;
+
+    return SUCCESS;
 }
 
 // Função para liberar a memória da pilha
 int unstack(ppStack pp) {
     if (*pp == NULL) {
-        return FAIL; // Retorna erro se a pilha já estiver desalocada
+        return FAIL;
     }
 
-    free((*pp)->data); // Libera a memória dos dados
-    free(*pp);         // Libera a memória da estrutura da pilha
-    *pp = NULL;        // Define o ponteiro como NULL para evitar acessos inválidos
+    free((*pp)->data);
+    free(*pp);
+    *pp = NULL;
 
-    return SUCCESS; // Retorna sucesso
+    return SUCCESS;
 }
 
 // Função para empilhar um elemento
 int push(pStack p, void *element) {
     if (p == NULL || p->data == NULL) {
-        return FAIL; // Retorna erro se a pilha não foi inicializada
+        return FAIL;
     }
 
     if (p->top >= p->size - 1) {
-        return FAIL; // Retorna erro se a pilha estiver cheia
+        return FAIL;
     }
 
-    // Copia o elemento para o topo da pilha
+    // Incrementa o topo da pilha
     p->top++;
     void *target = (char *)p->data + (p->top * p->sizedata);
-    memcpy(target, element, p->sizedata);
 
-    return SUCCESS; // Retorna sucesso
+    // Copia o ponteiro para o elemento na pilha
+    memcpy(target, &element, p->sizedata);
+
+    return SUCCESS;
 }
 
 // Função para desempilhar um elemento
 int pop(pStack p, void *element) {
     if (p == NULL || p->data == NULL) {
-        return FAIL; // Retorna erro se a pilha não foi inicializada
+        return FAIL;
     }
 
     if (p->top < 0) {
-        return FAIL; // Retorna erro se a pilha estiver vazia
+        return FAIL;
     }
 
-    // Copia o elemento do topo para o ponteiro fornecido
+    // Copia o ponteiro do topo da pilha para o elemento fornecido
     void *source = (char *)p->data + (p->top * p->sizedata);
     memcpy(element, source, p->sizedata);
+
+    // Decrementa o topo da pilha
     p->top--;
 
-    return SUCCESS; // Retorna sucesso
+    return SUCCESS;
 }
 
 // Função para limpar a pilha (mantendo a estrutura alocada)
 int cleanStack(pStack p) {
     if (p == NULL || p->data == NULL) {
-        return FAIL; // Retorna erro se a pilha não foi inicializada
+        return FAIL;
     }
 
-    p->top = -1; // Reseta o topo para -1 (pilha vazia)
+    // Libera todos os elementos da pilha
+    while (p->top >= 0) {
+        GenericData *item;
+        pop(p, &item);
+    }
 
-    return SUCCESS; // Retorna sucesso
+    p->top = -1;
+    return SUCCESS;
 }
 
 // Função para acessar o elemento do topo sem removê-lo
 int top(pStack p, void *top) {
     if (p == NULL || p->data == NULL) {
-        return FAIL; // Retorna erro se a pilha não foi inicializada
+        return FAIL;
     }
 
     if (p->top < 0) {
-        return FAIL; // Retorna erro se a pilha estiver vazia
+        return FAIL;
     }
 
-    // Copia o elemento do topo para o ponteiro fornecido
     void *source = (char *)p->data + (p->top * p->sizedata);
     memcpy(top, source, p->sizedata);
 
-    return SUCCESS; // Retorna sucesso
+    return SUCCESS;
 }

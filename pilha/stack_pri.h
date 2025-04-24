@@ -9,4 +9,10 @@ struct PE {
     int top;         // Índice do topo da pilha
 };
 
+// Estrutura genérica para armazenar dados (privada)
+typedef struct {
+    int type; // 1 = int, 2 = float, 3 = string
+    void *data;
+} GenericData;
+
 #endif // STACK_PRI_H

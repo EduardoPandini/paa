@@ -1,35 +1,24 @@
-#ifndef STACK_PUB_H
-#define STACK_PUB_H
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // Para usar memcpy
 
-// Definições de retorno
 #define SUCCESS 0
 #define FAIL 1
 
-// Estrutura de ponteiros para a pilha
 typedef struct PE *pStack, **ppStack;
 
-// Funções públicas da pilha
-
-// Inicializa a pilha com o tamanho máximo e tamanho de cada elemento
+// "Construtor": aloca memória e inicializa as variáveis
 int stack(ppStack pp, int size, int sizedata);
-
-// Libera a memória da pilha
+// "Destrutor": libera memória da estrutura
 int unstack(ppStack pp);
 
-// Empilha um elemento na pilha
+// **** "Operações de manipulação" ****
+// Empilha um elemento 
 int push(pStack p, void *element);
-
-// Desempilha um elemento da pilha
+// Desempilha um elemento
 int pop(pStack p, void *element);
-
-// Limpa a pilha, mantendo a estrutura alocada
+// Remove todos os dados da pilha mantendo o descritor alocado.
 int cleanStack(pStack p);
 
-// Retorna o elemento do topo sem removê-lo
+// **** "Operações de acesso" ****
+// Retorna uma cópia do dado do topo
 int top(pStack p, void *top);
-
-#endif // STACK_PUB_H

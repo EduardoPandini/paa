@@ -1,7 +1,7 @@
 #ifndef _BST_PRIVADO_H_
 #define _BST_PRIVADO_H_
 
-#include "BST_pub.h"
+#include "QDBST_pub.h"
 #include "DDLL_pub.h"
 #include <string.h>
 #include <stdio.h>

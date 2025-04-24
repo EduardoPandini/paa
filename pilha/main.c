@@ -1,107 +1,154 @@
 /* Arquivo EXEMPLO DE Aplicacao */
 // MODIFIQUEM-o, CORRIJAM-o!
 #include "main.h"
+#include "ctype.h"
+
+
 
 int main() {
-    // Variáveis para pilhas de diferentes tipos
-    pStack intStack = NULL;   // Pilha para inteiros
-    pStack floatStack = NULL; // Pilha para floats
-    pStack stringStack = NULL; // Pilha para strings
+    pStack myStack = NULL; // Pilha genérica
+    int ret, stackSize; // Variáveis para tamanho e retorno
 
-    int ret; // Variável para armazenar retornos das funções
+    printf("Digite o tamanho da pilha: ");
+    scanf("%d", &stackSize);
 
-    // **1. Trabalhando com inteiros**
-    int intElements[] = {1,1,1,1,1,1,1,1,1,1,1,1,10, 20, 30, 40, 50};
-    int intValue;
-    int intSize = 5; // Tamanho fixo da pilha de inteiros
-
-    // Inicializa a pilha para inteiros
-    ret = stack(&intStack, intSize, sizeof(int));
+    // Inicializa a pilha para armazenar ponteiros para GenericData
+    ret = stack(&myStack, stackSize, sizeof(GenericData *));
     if (ret == FAIL) {
-        printf("Erro ao inicializar a pilha de inteiros.\n");
+        printf("Erro ao inicializar a pilha.\n");
         return 1;
     }
 
-    // Empilha os inteiros
-    for (int i = 0; i < sizeof(intElements)/sizeof(int); i++) {
-        ret = push(intStack, &intElements[i]);
-        if (ret == FAIL) {
-            printf("Erro ao empilhar o inteiro %d.\n", intElements[i]);
+    printf("Digite os dados para empilhar (digite '-fim' para parar)\n , '-top' para ver o topo, '-pop' para desempilhar, '-clean' para limpar a pilha):\n");
+    while (1) {
+        char input[100];
+        printf("Entrada: ");
+        scanf("%s", input);
+
+        if (strcmp(input, "fim") == 0) break;
+
+        if (strcmp(input, "-top") == 0) {
+            // Verifica o topo da pilha
+            GenericData *topItem;
+            ret = top(myStack, &topItem);
+            if (ret == FAIL) {
+                printf("A pilha está vazia.\n");
+            } else {
+                if (topItem->type == 1) {
+                    printf("Topo da pilha (int): %d\n", *(int *)topItem->data);
+                } else if (topItem->type == 2) {
+                    printf("Topo da pilha (float): %.2f\n", *(float *)topItem->data);
+                } else if (topItem->type == 3) {
+                    printf("Topo da pilha (string): %s\n", (char *)topItem->data);
+                }
+            }
+            continue;
+        }
+
+        if (strcmp(input, "-pop") == 0) {
+            // Desempilha manualmente
+            GenericData *poppedItem;
+            ret = pop(myStack, &poppedItem);
+            if (ret == FAIL) {
+                printf("A pilha está vazia, não é possível desempilhar.\n");
+            } else {
+                if (poppedItem->type == 1) {
+                    printf("Desempilhado (int): %d\n", *(int *)poppedItem->data);
+                    free(poppedItem->data);
+                } else if (poppedItem->type == 2) {
+                    printf("Desempilhado (float): %.2f\n", *(float *)poppedItem->data);
+                    free(poppedItem->data);
+                } else if (poppedItem->type == 3) {
+                    printf("Desempilhado (string): %s\n", (char *)poppedItem->data);
+                    free(poppedItem->data);
+                }
+                free(poppedItem);
+            }
+            continue;
+        }
+
+        if (strcmp(input, "-clean") == 0) {
+            // Limpa a pilha
+            ret = cleanStack(myStack);
+            if (ret == FAIL) {
+                printf("Erro ao limpar a pilha.\n");
+            } else {
+                printf("Pilha limpa com sucesso.\n");
+            }
+            continue;
+        }
+
+        // Empilha um novo elemento
+        GenericData *item = malloc(sizeof(GenericData));
+        if (!item) {
+            printf("Erro ao alocar memória para o item.\n");
+            continue;
+        }
+
+        // Detecta o tipo de dado
+        if (strchr(input, '.') != NULL) {
+            // Float
+            item->type = 2;
+            float *value = malloc(sizeof(float));
+            if (!value) {
+                free(item);
+                printf("Erro ao alocar memória para o float.\n");
+                continue;
+            }
+            *value = atof(input);
+            item->data = value;
+        } else if (isdigit(input[0]) || (input[0] == '-' && isdigit(input[1]))) {
+            // Inteiro
+            item->type = 1;
+            int *value = malloc(sizeof(int));
+            if (!value) {
+                free(item);
+                printf("Erro ao alocar memória para o inteiro.\n");
+                continue;
+            }
+            *value = atoi(input);
+            item->data = value;
         } else {
-            printf("Empilhado (int): %d\n", intElements[i]);
+            // String
+            item->type = 3;
+            char *value = strdup(input);
+            if (!value) {
+                free(item);
+                printf("Erro ao alocar memória para a string.\n");
+                continue;
+            }
+            item->data = value;
+        }
+
+        // Empilha o item
+        ret = push(myStack, item);
+        if (ret == FAIL) {
+            printf("Erro ao empilhar o dado.\n");
+            free(item->data);
+            free(item);
+        } else {
+            printf("Dado empilhado com sucesso.\n");
         }
     }
 
-    // Desempilha os inteiros
-    printf("Desempilhando inteiros:\n");
-    while (pop(intStack, &intValue) == SUCCESS) {
-        printf("Desempilhado (int): %d\n", intValue);
-    }
-
-    // Libera a pilha de inteiros
-    unstack(&intStack);
-
-    // **2. Trabalhando com floats**
-    float floatElements[] = {1.1, 2.2, 3.3, 4.4, 5.5};
-    float floatValue;
-    int floatSize = 5; // Tamanho fixo da pilha de floats
-
-    // Inicializa a pilha para floats
-    ret = stack(&floatStack, floatSize, sizeof(float));
-    if (ret == FAIL) {
-        printf("Erro ao inicializar a pilha de floats.\n");
-        return 1;
-    }
-
-    // Empilha os floats
-    for (int i = 0; i < sizeof(floatElements)/sizeof(float); i++) {
-        ret = push(floatStack, &floatElements[i]);
-        if (ret == FAIL) {
-            printf("Erro ao empilhar o float %.2f.\n", floatElements[i]);
-        } else {
-            printf("Empilhado (float): %.2f\n", floatElements[i]);
+    printf("Desempilhando todos os dados restantes:\n");
+    GenericData *item;
+    while (pop(myStack, &item) == SUCCESS) {
+        if (item->type == 1) {
+            printf("Desempilhado (int): %d\n", *(int *)item->data);
+            free(item->data);
+        } else if (item->type == 2) {
+            printf("Desempilhado (float): %.2f\n", *(float *)item->data);
+            free(item->data);
+        } else if (item->type == 3) {
+            printf("Desempilhado (string): %s\n", (char *)item->data);
+            free(item->data);
         }
+        free(item);
     }
 
-    // Desempilha os floats
-    printf("Desempilhando floats:\n");
-    while (pop(floatStack, &floatValue) == SUCCESS) {
-        printf("Desempilhado (float): %.2f\n", floatValue);
-    }
-
-    // Libera a pilha de floats
-    unstack(&floatStack);
-
-    // **3. Trabalhando com strings**
-    char *stringElements[] = {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","casa", "carro", "moto", "bicicleta", "avião"};
-    char *stringValue;
-    int stringSize = 5; // Tamanho fixo da pilha de strings
-
-    // Inicializa a pilha para strings
-    ret = stack(&stringStack, stringSize, sizeof(char *));
-    if (ret == FAIL) {
-        printf("Erro ao inicializar a pilha de strings.\n");
-        return 1;
-    }
-
-    // Empilha as strings
-    for (int i = 0; i < sizeof(stringElements) / sizeof(char *); i++) {
-        ret = push(stringStack, &stringElements[i]);
-        if (ret == FAIL) {
-            printf("Erro ao empilhar a string \"%s\".\n", stringElements[i]);
-        } else {
-            printf("Empilhado (string): \"%s\"\n", stringElements[i]);
-        }
-    }
-
-    // Desempilha as strings
-    printf("Desempilhando strings:\n");
-    while (pop(stringStack, &stringValue) == SUCCESS) {
-        printf("Desempilhado (string): \"%s\"\n", stringValue);
-    }
-
-    // Libera a pilha de strings
-    unstack(&stringStack);
+    // Libera a pilha
+    unstack(&myStack);
 
     return 0;
 }
