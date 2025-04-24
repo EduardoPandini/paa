@@ -38,6 +38,48 @@ int unstack(ppStack pp) {
     return SUCCESS;
 }
 
+// Função auxiliar para detectar o tipo de dado e configurar o elemento
+GenericData *detectAndPrepare(const char *input) {
+    GenericData *item = malloc(sizeof(GenericData));
+    if (!item) {
+        return NULL;
+    }
+
+    // Detecta o tipo de dado
+    if (strchr(input, '.') != NULL) {
+        // Float
+        item->type = 2;
+        float *value = malloc(sizeof(float));
+        if (!value) {
+            free(item);
+            return NULL;
+        }
+        *value = atof(input);
+        item->data = value;
+    } else if (isdigit(input[0]) || (input[0] == '-' && isdigit(input[1]))) {
+        // Inteiro
+        item->type = 1;
+        int *value = malloc(sizeof(int));
+        if (!value) {
+            free(item);
+            return NULL;
+        }
+        *value = atoi(input);
+        item->data = value;
+    } else {
+        // String
+        item->type = 3;
+        char *value = strdup(input);
+        if (!value) {
+            free(item);
+            return NULL;
+        }
+        item->data = value;
+    }
+
+    return item;
+}
+
 // Função para empilhar um elemento
 int push(pStack p, void *element) {
     if (p == NULL || p->data == NULL) {
@@ -48,12 +90,19 @@ int push(pStack p, void *element) {
         return FAIL;
     }
 
+    // Detecta e prepara o elemento
+    GenericData *item = detectAndPrepare((const char *)element);
+    if (!item) {
+        return FAIL;
+    }
+
     // Incrementa o topo da pilha
     p->top++;
     void *target = (char *)p->data + (p->top * p->sizedata);
-
+    //     ^ponteiro   ^movimenta um byte e multiplica pelo tamanho do dado
+    
     // Copia o ponteiro para o elemento na pilha
-    memcpy(target, &element, p->sizedata);
+    memcpy(target, &item, p->sizedata);
 
     return SUCCESS;
 }

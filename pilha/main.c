@@ -3,8 +3,6 @@
 #include "main.h"
 #include "ctype.h"
 
-
-
 int main() {
     pStack myStack = NULL; // Pilha genérica
     int ret, stackSize; // Variáveis para tamanho e retorno
@@ -19,7 +17,7 @@ int main() {
         return 1;
     }
 
-    printf("Digite os dados para empilhar (digite '-fim' para parar)\n , '-top' para ver o topo, '-pop' para desempilhar, '-clean' para limpar a pilha):\n");
+    printf("Digite os dados para empilhar (digite 'fim' para parar):\n");
     while (1) {
         char input[100];
         printf("Entrada: ");
@@ -78,54 +76,10 @@ int main() {
             continue;
         }
 
-        // Empilha um novo elemento
-        GenericData *item = malloc(sizeof(GenericData));
-        if (!item) {
-            printf("Erro ao alocar memória para o item.\n");
-            continue;
-        }
-
-        // Detecta o tipo de dado
-        if (strchr(input, '.') != NULL) {
-            // Float
-            item->type = 2;
-            float *value = malloc(sizeof(float));
-            if (!value) {
-                free(item);
-                printf("Erro ao alocar memória para o float.\n");
-                continue;
-            }
-            *value = atof(input);
-            item->data = value;
-        } else if (isdigit(input[0]) || (input[0] == '-' && isdigit(input[1]))) {
-            // Inteiro
-            item->type = 1;
-            int *value = malloc(sizeof(int));
-            if (!value) {
-                free(item);
-                printf("Erro ao alocar memória para o inteiro.\n");
-                continue;
-            }
-            *value = atoi(input);
-            item->data = value;
-        } else {
-            // String
-            item->type = 3;
-            char *value = strdup(input);
-            if (!value) {
-                free(item);
-                printf("Erro ao alocar memória para a string.\n");
-                continue;
-            }
-            item->data = value;
-        }
-
         // Empilha o item
-        ret = push(myStack, item);
+        ret = push(myStack, input);
         if (ret == FAIL) {
             printf("Erro ao empilhar o dado.\n");
-            free(item->data);
-            free(item);
         } else {
             printf("Dado empilhado com sucesso.\n");
         }
@@ -148,7 +102,6 @@ int main() {
     }
 
     // Libera a pilha
-    printf("Destruindo pilha\n");
     unstack(&myStack);
 
     return 0;
